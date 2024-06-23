@@ -4,7 +4,6 @@ function unload-nix() {
     setopt local_options err_return
 
     if [[ -n "$NIX_SERVER_FORWARDING_PATH" ]]; then
-        typeset -U path PATH
         local path_ind="$path[(Ie)$NIX_SERVER_FORWARDING_PATH]"
         if [[ "$path_ind" -ne 0 ]]; then
             path=("${(@)path[1,$path_ind - 1]}" "${(@)path[$path_ind + 1,-1]}")
