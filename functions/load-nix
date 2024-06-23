@@ -11,16 +11,16 @@ function load-nix() {
         return 1
     fi
 
-    local -a arg_forward_path arg_socket
+    local -a arg_forwarder arg_socket
     zparseopts -D -E -K \
-        -forward:=arg_forward_path \
+        -forward:=arg_forwarder \
         -socket:=arg_socket
 
-    local forward_path
-    if [[ -n $arg_forward_path ]]; then
-        forward_path="$arg_forward_path[-1]"
-        typeset -g NIX_SERVER_FORWARDING_PATH="$arg_forward_path"
-        path=("$forward_path" "$path[@]")
+    local forwarder
+    if [[ -n $arg_forwarder ]]; then
+        forwarder="$arg_forwarder[-1]"
+        typeset -g NIX_SERVER_FORWARDING_PATH="${XDG_CONFIG_HOME-${HOME}/.config}/$arg_forwarder"
+        path=("$forwarder" "$path[@]")
     fi
 
     local state_dir="${XDG_STATE_HOME-${HOME}/.local/state}/nix-server"

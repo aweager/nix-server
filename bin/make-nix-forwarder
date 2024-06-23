@@ -19,15 +19,16 @@ zparseopts -D -E -K \
     {S,-socket-var}:=arg_sock_var \
     {f,-force}=arg_force
 
-local dest sock_var
+local dest dest_folder sock_var
 
 if [[ -z $arg_dest ]]; then
     print_usage
 fi
 dest="$arg_dest[-1]"
+dest_folder="${XDG_CONFIG_HOME-${HOME}/.config}/nix-server/bins/$dest"
 
-if [[ -e "${dest}/impl/forwarder" && -z $arg_force ]]; then
-    printf 'Forwarder already exists at path %s\nUse -f to overwrite\n' "$dest" >&2
+if [[ -e "${dest_folder}/impl/forwarder" && -z $arg_force ]]; then
+    printf 'Forwarder already exists at path %s\nUse -f to overwrite\n' "$dest_folder" >&2
     exit 1
 fi
 
@@ -37,26 +38,26 @@ else
     sock_var="NIX_SERVER_SOCKET"
 fi
 
-mkdir -p "${dest}/impl"
+mkdir -p "${dest_folder}/impl"
 
 echo "Creating forwarder script:\n"
 
 () {
     printf '#!/bin/zsh -f\n'
     printf 'exec command-server-call "$%s" "$(basename "$0")" "$@"\n' "$sock_var"
-} >&1 > "${dest}/impl/forwarder"
+} >&1 > "${dest_folder}/impl/forwarder"
 
-chmod +x "${dest}/impl/forwarder"
+chmod +x "${dest_folder}/impl/forwarder"
 
 if [[ $# -ne 0 ]]; then
     echo; echo "Forwarding commands..."
     local to_forward
     for to_forward; do
-        if [[ ! -e "${dest}/${to_forward}" ]]; then
+        if [[ ! -e "${dest_folder}/${to_forward}" ]]; then
             printf '    Linking %s\n' "$to_forward"
-            ln -s "impl/forwarder" "${dest}/${to_forward}"
+            ln -s "impl/forwarder" "${dest_folder}/${to_forward}"
         fi
     done
 fi
 
-echo "Forwarding setup created in ${dest}"
+echo "Forwarding setup created in ${dest_folder}"
