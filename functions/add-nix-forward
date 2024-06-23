@@ -12,9 +12,9 @@ function add-nix-forward() {
     local dest_dir
 
     if [[ -n $arg_dest ]]; then
-        dest="${XDG_CONFIG_HOME-${HOME}/.config}/$arg_dest[-1]"
+        dest_dir="${XDG_CONFIG_HOME-${HOME}/.config}/nix-server/bins/$arg_dest[-1]"
     elif [[ -n "$NIX_SERVER_FORWARDING_PATH" ]]; then
-        dest="$NIX_SERVER_FORWARDING_PATH"
+        dest_dir="$NIX_SERVER_FORWARDING_PATH"
     else
         printf '%s\n' \
             "Usage:" \
