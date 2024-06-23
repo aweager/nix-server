@@ -19,7 +19,7 @@ function load-nix() {
     local forwarder
     if [[ -n $arg_forwarder ]]; then
         forwarder="$arg_forwarder[-1]"
-        typeset -g NIX_SERVER_FORWARDING_PATH="${XDG_CONFIG_HOME-${HOME}/.config}/$arg_forwarder"
+        typeset -g NIX_SERVER_FORWARDING_PATH="${XDG_CONFIG_HOME-${HOME}/.config}/$forwarder"
         path=("$NIX_SERVER_FORWARDING_PATH" "$path[@]")
     fi
 
