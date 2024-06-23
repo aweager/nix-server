@@ -13,8 +13,6 @@ function unload-nix() {
     fi
 
     if [[ -n "$NIX_SERVER_SOCKET" ]]; then
-        printf '%s\n' "$path[@]"
-        which command-server-terminate
         command-server-terminate "$NIX_SERVER_SOCKET"
         unset NIX_SERVER_SOCKET
         unset NIX_SERVER_PID
