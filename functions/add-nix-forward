@@ -20,13 +20,12 @@ function add-nix-forward() {
             "Usage:" \
             "    add-nix-forward [[-d | --dest] <destination>] <commands>..." \
             >&2
-
-        exit 1
+        return 1
     fi
 
     if [[ ! -x "${dest_dir}/impl/forwarder" ]]; then
         printf 'Forwarder does not exist at %s\n' "$dest_dir" >&2
-        exit 1
+        return 1
     fi
 
     local to_forward
