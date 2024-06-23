@@ -1,0 +1,40 @@
+#!/bin/zsh
+
+zmodload zsh/zutil
+
+function add-nix-forward() {
+    setopt local_options err_return
+
+    local -a arg_dest
+    zparseopts -D -E -K \
+        {d,-dest}:=arg_dest
+
+    local dest
+
+    if [[ -n $arg_dest ]]; then
+        dest="$arg_dest[-1]"
+    elif [[ -n "$NIX_SERVER_FORWARDING_PATH" ]]; then
+        dest="$NIX_SERVER_FORWARDING_PATH"
+    else
+        printf '%s\n' \
+            "Usage:" \
+            "    add-nix-forward [[-d | --dest] <destination>] <commands>..." \
+            >&2
+
+        exit 1
+    fi
+
+    if [[ ! -x "${dest}/impl/forwarder" ]]; then
+        printf 'Forwarder does not exist at %s\n' "$dest" >&2
+        exit 1
+    fi
+
+    local to_forward
+    for to_forward; do
+        if [[ ! -e "${dest}/${to_forward}" ]]; then
+            ln -s "impl/forwarder" "${dest}/${to_forward}"
+        fi
+    done
+}
+
+add-nix-forward "$@"

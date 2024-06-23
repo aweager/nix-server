@@ -1,0 +1,62 @@
+#!/bin/zsh
+
+setopt err_exit
+
+zmodload zsh/zutil
+
+function print_usage() {
+    printf '%s\n' \
+        "Usage:" \
+        "    make-nix-forwarder [-d | --dest] <destination> [[-S | --socket-var] <sock-var>] [-f | --force] [commands...]" \
+        >&2
+
+    exit 1
+}
+
+local -a arg_dest arg_sock_var arg_force
+zparseopts -D -E -K \
+    {d,-dest}:=arg_dest \
+    {S,-socket-var}:=arg_sock_var \
+    {f,-force}=arg_force
+
+local dest sock_var
+
+if [[ -z $arg_dest ]]; then
+    print_usage
+fi
+dest="$arg_dest[-1]"
+
+if [[ -e "${dest}/impl/forwarder" && -z $arg_force ]]; then
+    printf 'Forwarder already exists at path %s\nUse -f to overwrite\n' "$dest" >&2
+    exit 1
+fi
+
+if [[ -n $arg_sock_var ]]; then
+    sock_var="$arg_sock_var[-1]"
+else
+    sock_var="NIX_SERVER_SOCKET"
+fi
+
+mkdir -p "${dest}/impl"
+
+echo "Creating forwarder script:\n"
+
+() {
+    printf '#!/bin/zsh -f\n'
+    printf 'exec command-server-call "$%s" "$(basename "$0")" "$@"\n' "$sock_var"
+} >&1 > "${dest}/impl/forwarder"
+
+chmod +x "${dest}/impl/forwarder"
+
+if [[ $# -ne 0 ]]; then
+    echo; echo "Forwarding commands..."
+    local to_forward
+    for to_forward; do
+        if [[ ! -e "${dest}/${to_forward}" ]]; then
+            printf '    Linking %s\n' "$to_forward"
+            ln -s "impl/forwarder" "${dest}/${to_forward}"
+        fi
+    done
+fi
+
+echo "Forwarding setup created in ${dest}"
