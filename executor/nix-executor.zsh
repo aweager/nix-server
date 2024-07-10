@@ -2,15 +2,13 @@
 
 to_forward_1="$1"
 to_forward_2="$2"
-to_forward_3="$3"
-shift 3
+shift 2
 nix_develop_args=("$@")
 
 loop_command_args=(
     "${COMMAND_SERVER_LIB}"
     "${to_forward_1}"
     "${to_forward_2}"
-    "${to_forward_3}"
 )
 loop_command=(
     .
