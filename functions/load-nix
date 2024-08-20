@@ -1,4 +1,4 @@
-# vim: set syntax=zsh
+#!/bin/zsh
 
 zmodload zsh/zutil
 autoload -Uz add-zsh-hook
@@ -35,6 +35,7 @@ function load-nix() {
     local plugin_dir="$(whence -p make-nix-forwarder)"
     plugin_dir="${plugin_dir:a:h}/.."
     command-server-start \
+        --pid-fd 3 \
         "$plugin_dir/server.conf" \
         --socket "$NIX_SERVER_SOCKET" \
         --log-file "$log_file" \
