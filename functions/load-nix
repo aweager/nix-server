@@ -42,13 +42,13 @@ function load-nix() {
         -- "$@" 3> "$server_pid_file"
     command-server reload "$NIX_SERVER_SOCKET"
 
-    typeset -g NIX_SERVER_PID="$(cat "$server_pid_file")"
+    typeset -gx NIX_SERVER_PID="$(cat "$server_pid_file")"
     printf 'Server running on pid %s\n' "$NIX_SERVER_PID"
 
     local forwarder
     if [[ -n $arg_forwarder ]]; then
         forwarder="$arg_forwarder[-1]"
-        typeset -g NIX_SERVER_FORWARDING_PATH="${XDG_CONFIG_HOME-${HOME}/.config}/nix-server/bins/$forwarder"
+        typeset -gx NIX_SERVER_FORWARDING_PATH="${XDG_CONFIG_HOME-${HOME}/.config}/nix-server/bins/$forwarder"
         path=("$NIX_SERVER_FORWARDING_PATH" "$path[@]")
     fi
 

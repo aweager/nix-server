@@ -1,0 +1,18 @@
+#!/bin/zsh
+
+zmodload zsh/zutil
+autoload -Uz add-zsh-hook
+
+function reload-nix() {
+    setopt local_options err_return
+
+    if [[ -z "$NIX_SERVER_SOCKET" ]]; then
+        printf 'No server is running at %s\n' '$NIX_SERVER_SOCKET' >&2
+        return 1
+    fi
+
+    command-server-reload "$NIX_SERVER_SOCKET"
+    echo "Make sure to restart jobs!"
+}
+
+reload-nix "$@"
