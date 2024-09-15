@@ -4,7 +4,7 @@ function in-nix() {
     setopt local_options err_return
 
     if [[ -n "$NIX_SERVER_SOCKET" ]]; then
-        command-server-call "$NIX_SERVER_SOCKET" "$@"
+        command-server run "$NIX_SERVER_SOCKET" "$@"
     else
         echo "No nix server running" >&2
         return 1

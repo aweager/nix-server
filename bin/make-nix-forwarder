@@ -44,7 +44,7 @@ echo "Creating forwarder script:\n"
 
 () {
     printf '#!/bin/zsh -f\n'
-    printf 'exec command-server-call "$%s" "$(basename "$0")" "$@"\n' "$sock_var"
+    printf 'exec command-server run "$%s" "$(basename "$0")" "$@"\n' "$sock_var"
 } >&1 > "${dest_folder}/impl/forwarder"
 
 chmod +x "${dest_folder}/impl/forwarder"

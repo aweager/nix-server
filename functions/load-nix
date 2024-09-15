@@ -12,7 +12,7 @@ function load-nix() {
     fi
 
     local -a arg_forwarder arg_socket
-    zparseopts -D -E -K \
+    zparseopts -D \
         -forward:=arg_forwarder \
         -socket:=arg_socket
 
@@ -34,12 +34,13 @@ function load-nix() {
 
     local plugin_dir="$(whence -p make-nix-forwarder)"
     plugin_dir="${plugin_dir:a:h}/.."
-    command-server-start \
+    command-server start \
         --pid-fd 3 \
+        "$NIX_SERVER_SOCKET" \
         "$plugin_dir/server.conf" \
-        --socket "$NIX_SERVER_SOCKET" \
         --log-file "$log_file" \
         -- "$@" 3> "$server_pid_file"
+    command-server reload "$NIX_SERVER_SOCKET"
 
     typeset -g NIX_SERVER_PID="$(cat "$server_pid_file")"
     printf 'Server running on pid %s\n' "$NIX_SERVER_PID"
