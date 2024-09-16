@@ -18,7 +18,7 @@ function add-nix-forward() {
     else
         printf '%s\n' \
             "Usage:" \
-            "    add-nix-forward [[-d | --dest] <destination>] <commands>..." \
+            "    add-nix-forward [[-d | --dest] <destination>] command[:rename]..." \
             >&2
         return 1
     fi
@@ -28,9 +28,17 @@ function add-nix-forward() {
         return 1
     fi
 
-    local to_forward
+    local to_forward forward_name prog_name
     for to_forward; do
-        if [[ ! -e "${dest_dir}/${to_forward}" ]]; then
+        if [[ "$to_forward" == *:* ]]; then
+            forward_name="${to_forward%%:*}"
+            prog_name="${to_forward#*:}"
+            () {
+                printf '#!/bin/zsh -f\n'
+                printf 'exec "${0:a:h}/impl/forward-with-rename" %s "$@"' "${(q)prog_name}"
+            } > "${dest_dir}/${forward_name}"
+            chmod +x "${dest_dir}/${forward_name}"
+        elif [[ ! -e "${dest_dir}/${to_forward}" ]]; then
             ln -s "impl/forwarder" "${dest_dir}/${to_forward}"
         fi
     done

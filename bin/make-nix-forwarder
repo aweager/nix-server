@@ -7,17 +7,16 @@ zmodload zsh/zutil
 function print_usage() {
     printf '%s\n' \
         "Usage:" \
-        "    make-nix-forwarder [-d | --dest] <destination> [[-S | --socket-var] <sock-var>] [-f | --force] [commands...]" \
+        "    make-nix-forwarder [-d | --dest] <destination> [[-S | --socket-var] <sock-var>]" \
         >&2
 
     exit 1
 }
 
-local -a arg_dest arg_sock_var arg_force
+local -a arg_dest arg_sock_var
 zparseopts -D -E -K \
     {d,-dest}:=arg_dest \
-    {S,-socket-var}:=arg_sock_var \
-    {f,-force}=arg_force
+    {S,-socket-var}:=arg_sock_var
 
 local dest dest_folder sock_var
 
@@ -26,11 +25,6 @@ if [[ -z $arg_dest ]]; then
 fi
 dest="$arg_dest[-1]"
 dest_folder="${XDG_CONFIG_HOME-${HOME}/.config}/nix-server/bins/$dest"
-
-if [[ -e "${dest_folder}/impl/forwarder" && -z $arg_force ]]; then
-    printf 'Forwarder already exists at path %s\nUse -f to overwrite\n' "$dest_folder" >&2
-    exit 1
-fi
 
 if [[ -n $arg_sock_var ]]; then
     sock_var="$arg_sock_var[-1]"
@@ -47,17 +41,15 @@ echo "Creating forwarder script:\n"
     printf 'exec command-server run "$%s" "$(basename "$0")" "$@"\n' "$sock_var"
 } >&1 > "${dest_folder}/impl/forwarder"
 
-chmod +x "${dest_folder}/impl/forwarder"
+echo "Creating renaming forwarder script:\n"
 
-if [[ $# -ne 0 ]]; then
-    echo; echo "Forwarding commands..."
-    local to_forward
-    for to_forward; do
-        if [[ ! -e "${dest_folder}/${to_forward}" ]]; then
-            printf '    Linking %s\n' "$to_forward"
-            ln -s "impl/forwarder" "${dest_folder}/${to_forward}"
-        fi
-    done
-fi
+() {
+    printf '#!/bin/zsh -f\n'
+    printf 'prog_name="$1"; shift\n'
+    printf 'exec command-server run "$%s" "$prog_name" "$@"\n' "$sock_var"
+} >&1 > "${dest_folder}/impl/forward-with-rename"
+
+chmod +x "${dest_folder}/impl/forwarder"
+chmod +x "${dest_folder}/impl/forward-with-rename"
 
 echo "Forwarding setup created in ${dest_folder}"
