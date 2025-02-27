@@ -15,6 +15,12 @@ loop_command=(
     "${0:h}/nix-executor-loop.sh"
 )
 
+local pid
+trap '
+    kill $pid
+    wait $pid
+' EXIT HUP TERM INT
+
 # Using socat to create an interactive nix develop shell so that shell functions
 # and aliases are available. This is particularly useful for the stdenv
 # functions buildPhase, installPhase, etc
@@ -24,4 +30,6 @@ loop_command=(
     socat \
         -lf /dev/null \
         'STDIN,ignoreeof!!STDOUT,rawer' \
-        "EXEC:${0:h}/invoke-nix-develop.zsh,pty,sane,echo=0,ctty,setsid"
+        "EXEC:${0:h}/invoke-nix-develop.zsh,ignoreeof,pty,sane,echo=0,ctty,setsid" &
+pid=$!
+wait $pid
