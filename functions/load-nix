@@ -34,11 +34,18 @@ function load-nix() {
 
     local plugin_dir="$(whence -p make-nix-forwarder)"
     plugin_dir="${plugin_dir:a:h}/.."
+    local server_conf
+    if [[ -e flake.nix ]]; then
+        server_conf="$plugin_dir/develop-server.conf"
+    else
+        server_conf="$plugin_dir/shell-server.conf"
+    fi
+
     command-server start \
         --pid-fd 3 \
         "$NIX_SERVER_SOCKET" \
-        "$plugin_dir/server.conf" \
         --log-file "$log_file" \
+        "$server_conf" \
         -- "$@" 3> "$server_pid_file"
     command-server reload "$NIX_SERVER_SOCKET"
 

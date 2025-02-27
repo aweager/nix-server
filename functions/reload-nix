@@ -11,7 +11,7 @@ function reload-nix() {
         return 1
     fi
 
-    command-server-reload "$NIX_SERVER_SOCKET"
+    command-server reload "$NIX_SERVER_SOCKET"
     echo "Make sure to restart jobs!"
 }
 

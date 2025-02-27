@@ -10,4 +10,9 @@ if [[ $PMSPEC != *b* ]]; then
     export PATH
 fi
 
-autoload -Uz in-nix load-nix unload-nix add-nix-forward
+if [[ -n "$NIX_SERVER_FORWARDING_PATH" ]]; then
+    path=("$NIX_SERVER_FORWARDING_PATH" "$path[@]")
+    export PATH
+fi
+
+autoload -Uz in-nix load-nix unload-nix add-nix-forward reload-nix
