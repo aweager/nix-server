@@ -42,7 +42,11 @@ function load-nix() {
             -- nix-shell "$@" --command
     fi
 
-    cmdctl reload "$NIX_SERVER_SOCKET"
+    if ! cmdctl reload "$NIX_SERVER_SOCKET"; then
+        cmdctl stop "$NIX_SERVER_SOCKET"
+        unset NIX_SERVER_SOCKET
+        return 1
+    fi
 
     local forwarder
     if [[ -n $arg_forwarder ]]; then
