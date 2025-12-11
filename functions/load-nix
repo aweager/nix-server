@@ -29,28 +29,20 @@ function load-nix() {
         NIX_SERVER_SOCKET="$arg_socket[-1]"
     fi
 
-    local log_file="$state_dir/$$.server.log"
-    local server_pid_file="$state_dir/$$.server.pid"
-
     local plugin_dir="$(whence -p make-nix-forwarder)"
     plugin_dir="${plugin_dir:a:h}/.."
     local server_conf
     if [[ -e flake.nix ]]; then
-        server_conf="$plugin_dir/develop-server.conf"
+        cmdctl spawn \
+            -L "$NIX_SERVER_SOCKET" \
+            -- nix develop "$@" -c
     else
-        server_conf="$plugin_dir/shell-server.conf"
+        cmdctl spawn \
+            -L "$NIX_SERVER_SOCKET" \
+            -- nix-shell "$@" --command
     fi
 
-    command-server start \
-        --pid-fd 3 \
-        "$NIX_SERVER_SOCKET" \
-        --log-file "$log_file" \
-        "$server_conf" \
-        -- "$@" 3> "$server_pid_file"
-    command-server reload "$NIX_SERVER_SOCKET"
-
-    typeset -gx NIX_SERVER_PID="$(cat "$server_pid_file")"
-    printf 'Server running on pid %s\n' "$NIX_SERVER_PID"
+    cmdctl reload "$NIX_SERVER_SOCKET"
 
     local forwarder
     if [[ -n $arg_forwarder ]]; then

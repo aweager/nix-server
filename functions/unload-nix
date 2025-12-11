@@ -13,9 +13,8 @@ function unload-nix() {
     fi
 
     if [[ -n "$NIX_SERVER_SOCKET" ]]; then
-        command-server stop "$NIX_SERVER_SOCKET"
+        cmdctl stop "$NIX_SERVER_SOCKET"
         unset NIX_SERVER_SOCKET
-        unset NIX_SERVER_PID
     fi
 }
 
